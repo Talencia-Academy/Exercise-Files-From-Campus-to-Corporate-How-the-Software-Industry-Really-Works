@@ -1,0 +1,85 @@
+Building a Food Delivery App Using Agile Sprints
+Project Example
+
+Develop a Food Delivery Mobile App
+
+Instead of building the entire app at once, the team develops it feature by feature in sprints.
+
+Sprint 1 – Basic App Setup (2 Weeks)
+
+Goal: Users should be able to open the app and create an account.
+
+Tasks:
+
+Design basic UI
+
+User registration
+
+Login functionality
+
+Basic home screen
+
+Deliverable:
+Users can create an account and log in to the app
+
+Sprint 2 – Restaurant & Menu Features
+
+Goal: Allow users to browse food options.
+
+Tasks:
+
+Display restaurant list
+
+Show food menu
+
+Add items to cart
+
+Deliverable:
+Users can browse restaurants and add food to cart
+
+Sprint 3 – Order & Payment
+
+Goal: Enable ordering food.
+
+Tasks:
+
+Place order
+
+Payment integration
+
+Order confirmation screen
+
+Deliverable:
+Users can successfully order food
+
+Sprint 4 – Improvements & Feedback
+
+Goal: Improve the app based on feedback.
+
+Tasks:
+
+Order tracking
+
+Ratings & reviews
+
+Bug fixes
+
+UI improvements
+
+Deliverable:
+Complete usable food delivery app
+
+Agile Activities During Each Sprint
+
+Daily Standup
+Team shares progress and blockers (15 minutes daily)
+
+Sprint Review
+Team demonstrates new features to stakeholders
+
+Retrospective
+Team discusses how to improve the next sprint
+
+Key Message for Students
+
+👉 Agile focuses on delivering small working features quickly instead of waiting for the entire project to finish.

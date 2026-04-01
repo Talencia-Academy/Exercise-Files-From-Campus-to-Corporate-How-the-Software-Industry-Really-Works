@@ -1,0 +1,42 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Student Attendance Web App" id="attendanceApp">
+    <mxGraphModel>
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Client Layer -->
+        <mxCell id="2" value="Web Browser (Teacher/Student/Admin)" style="shape=rectangle;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="220" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Frontend Layer -->
+        <mxCell id="3" value="Frontend (HTML/CSS/JS)" style="shape=rectangle;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="40" y="140" width="220" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Backend Layer -->
+        <mxCell id="4" value="Backend (Spring Boot / Node.js)" style="shape=rectangle;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="240" width="220" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Database Layer -->
+        <mxCell id="5" value="Database (MySQL/PostgreSQL)" style="shape=rectangle;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="40" y="340" width="220" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows -->
+        <mxCell id="6" style="endArrow=block;strokeColor=#000000;" edge="1" parent="1" source="2" target="3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7" style="endArrow=block;strokeColor=#000000;" edge="1" parent="1" source="3" target="4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8" style="endArrow=block;strokeColor=#000000;" edge="1" parent="1" source="4" target="5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

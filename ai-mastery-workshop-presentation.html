@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Mastery Workshop — From User to Power User</title>
+<style>
+[data-theme="dark"] {
+  --bg: #0d1117; --surface: #161b22; --surface2: #21262d;
+  --accent: #00c4a7; --accent2: #388bfd; --accent3: #f78166; --accent4: #d2a8ff;
+  --text: #e6edf3; --muted: #8b949e; --border: #30363d;
+  --code-bg: #090d12; --code-text: #a8d8b9;
+  --picker-card: #161b22; --picker-border: #30363d;
+}
+[data-theme="light"] {
+  --bg: #ffffff; --surface: #f6f8fa; --surface2: #eaeef2;
+  --accent: #0969da; --accent2: #8250df; --accent3: #cf222e; --accent4: #0550ae;
+  --text: #1f2328; --muted: #656d76; --border: #d0d7de;
+  --code-bg: #f6f8fa; --code-text: #24292f;
+  --picker-card: #ffffff; --picker-border: #d0d7de;
+}
+[data-theme="warm"] {
+  --bg: #1c1208; --surface: #2a1e0f; --surface2: #3d2e1a;
+  --accent: #e8a44a; --accent2: #7ec8a0; --accent3: #e07060; --accent4: #c4a56e;
+  --text: #f2e6d0; --muted: #a89070; --border: #4a3820;
+  --code-bg: #120e06; --code-text: #d4b896;
+  --picker-card: #2a1e0f; --picker-border: #4a3820;
+}
+[data-theme="contrast"] {
+  --bg: #000000; --surface: #0a0a0a; --surface2: #1a1a1a;
+  --accent: #ffff00; --accent2: #00ffff; --accent3: #ff4444; --accent4: #ff88ff;
+  --text: #ffffff; --muted: #cccccc; --border: #444444;
+  --code-bg: #000000; --code-text: #00ff00;
+  --picker-card: #0a0a0a; --picker-border: #444444;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --sidebar-w: 220px; }
+body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; height: 100vh; display: flex; transition: background .3s, color .3s; }
+
+#sidebar { width: var(--sidebar-w); min-width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; z-index: 10; }
+#sidebar-header { padding: 18px 16px 14px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--accent); }
+#chapter-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+#chapter-list::-webkit-scrollbar { width: 4px; }
+#chapter-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.ch-item { padding: 9px 16px; font-size: 12px; color: var(--muted); cursor: pointer; border-left: 3px solid transparent; transition: all .2s; line-height: 1.4; }
+.ch-item:hover { color: var(--text); background: var(--surface2); }
+.ch-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(0,0,0,.12); font-weight: 600; }
+.ch-num { font-size: 10px; color: var(--muted); margin-right: 6px; }
+
+#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+#slide-counter { position: absolute; top: 16px; right: 20px; z-index: 20; font-size: 13px; color: var(--muted); background: var(--surface); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); }
+#hint { position: absolute; bottom: 14px; right: 20px; font-size: 11px; color: var(--muted); z-index: 5; }
+#progress { height: 2px; background: var(--border); }
+#progress-bar { height: 100%; background: var(--accent); transition: width .3s ease; }
+
+#slide-viewport { flex: 1; overflow: hidden; position: relative; }
+.slide { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 40px 60px; opacity: 0; pointer-events: none; transform: translateX(60px); transition: opacity .35s ease, transform .35s ease; }
+.slide.active { opacity: 1; pointer-events: all; transform: translateX(0); }
+.slide.prev { opacity: 0; transform: translateX(-60px); }
+.slide-inner { width: 100%; max-width: 900px; }
+
+.tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+.tag.orange { color: var(--accent3); } .tag.purple { color: var(--accent4); } .tag.blue { color: var(--accent2); }
+h1 { font-size: clamp(2rem,4vw,3.2rem); font-weight: 800; line-height: 1.1; margin-bottom: 16px; }
+h2 { font-size: clamp(1.5rem,3vw,2.4rem); font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
+h3 { font-size: clamp(1.1rem,2vw,1.5rem); font-weight: 600; margin-bottom: 12px; }
+p.sub { font-size: 1.1rem; color: var(--muted); line-height: 1.6; max-width: 640px; }
+.accent { color: var(--accent); } .blue { color: var(--accent2); } .orange { color: var(--accent3); } .purple { color: var(--accent4); }
+
+.big-num { font-size: clamp(4rem,10vw,8rem); font-weight: 900; line-height: 1; color: var(--accent); }
+.big-label { font-size: 1.2rem; color: var(--muted); margin-top: 8px; }
+
+.code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: .82rem; line-height: 1.7; color: var(--code-text); overflow-x: auto; margin-top: 16px; }
+.code-block .cm { color: var(--muted); } .code-block .kw { color: var(--accent4); } .code-block .str { color: var(--accent2); } .code-block .val { color: var(--accent3); }
+
+.shell-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-top: 16px; }
+.shell-titlebar { background: var(--surface2); padding: 8px 14px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border); }
+.shell-dot { width: 10px; height: 10px; border-radius: 50%; }
+.shell-dot.r { background: #ff5f57; } .shell-dot.y { background: #febc2e; } .shell-dot.g { background: #28c840; }
+.shell-title { font-size: .72rem; color: var(--muted); margin-left: 8px; font-family: monospace; }
+.shell-body { padding: 6px 0; }
+.shell-row { display: flex; align-items: baseline; padding: 5px 16px; border-bottom: 1px solid rgba(128,128,128,.15); font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: .8rem; }
+.shell-row:last-child { border-bottom: none; }
+.shell-prompt { color: var(--accent); margin-right: 10px; flex-shrink: 0; }
+.shell-cmd { color: var(--code-text); flex: 1; }
+.shell-desc { color: var(--muted); font-size: .72rem; margin-left: 18px; flex-shrink: 0; white-space: nowrap; }
+
+.cards { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 24px; }
+.card { flex: 1; min-width: 160px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 18px; transition: border-color .2s; }
+.card:hover { border-color: var(--accent); }
+.card-icon { font-size: 1.8rem; margin-bottom: 10px; }
+.card h4 { font-size: .95rem; font-weight: 700; margin-bottom: 6px; }
+.card p { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+.card.accent-border { border-top: 3px solid var(--accent); } .card.blue-border { border-top: 3px solid var(--accent2); }
+.card.orange-border { border-top: 3px solid var(--accent3); } .card.purple-border { border-top: 3px solid var(--accent4); }
+
+.steps { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.step { display: flex; align-items: flex-start; gap: 16px; }
+.step-num { min-width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--bg); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .85rem; flex-shrink: 0; margin-top: 2px; }
+.step-num.blue { background: var(--accent2); } .step-num.orange { background: var(--accent3); } .step-num.purple { background: var(--accent4); }
+.step-body h4 { font-size: .95rem; font-weight: 600; margin-bottom: 3px; }
+.step-body p { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 20px; align-items: start; }
+.cols.wide { grid-template-columns: 1.2fr 1fr; }
+
+.flow { display: flex; align-items: center; flex-wrap: nowrap; margin-top: 24px; }
+.flow-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: .82rem; font-weight: 600; text-align: center; flex: 1; min-width: 0; }
+.flow-box.hi { border-color: var(--accent); color: var(--accent); } .flow-box.hi2 { border-color: var(--accent2); color: var(--accent2); }
+.flow-box.hi3 { border-color: var(--accent3); color: var(--accent3); } .flow-box.hi4 { border-color: var(--accent4); color: var(--accent4); }
+.flow-arrow { color: var(--muted); font-size: 1.3rem; padding: 0 6px; flex-shrink: 0; }
+
+.vstack { display: flex; flex-direction: column; gap: 6px; }
+.vstack-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; font-size: .82rem; }
+.vstack-arrow { text-align: center; color: var(--muted); font-size: 1.1rem; }
+.vstack-box.hi { border-color: var(--accent); } .vstack-box.hi2 { border-color: var(--accent2); }
+.vstack-box.hi3 { border-color: var(--accent3); } .vstack-box.hi4 { border-color: var(--accent4); }
+
+.pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.pill { padding: 8px 18px; border-radius: 100px; font-size: .85rem; font-weight: 600; border: 1px solid var(--border); background: var(--surface); }
+.pill.green { border-color: var(--accent); color: var(--accent); } .pill.blue { border-color: var(--accent2); color: var(--accent2); }
+.pill.orange { border-color: var(--accent3); color: var(--accent3); } .pill.purple { border-color: var(--accent4); color: var(--accent4); }
+
+.tbl { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: .85rem; }
+.tbl th { text-align: left; padding: 10px 14px; background: var(--surface2); color: var(--muted); font-weight: 700; font-size: .75rem; text-transform: uppercase; letter-spacing: .8px; }
+.tbl td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl td:first-child { font-weight: 600; color: var(--accent); }
+
+.alert { border-radius: 10px; padding: 14px 18px; margin-top: 16px; font-size: .85rem; line-height: 1.6; border-left: 4px solid; }
+.alert.warn { border-color: var(--accent3); background: rgba(128,64,50,.12); color: var(--accent3); }
+.alert.info { border-color: var(--accent2); background: rgba(56,139,253,.08); color: var(--accent2); }
+.alert strong { font-weight: 700; }
+
+.title-slide { text-align: center; }
+.title-slide h1 { font-size: clamp(2.4rem,5vw,4rem); }
+
+.ch-transition { text-align: center; }
+.ch-badge { display: inline-block; font-size: .8rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 6px 20px; border-radius: 100px; margin-bottom: 28px; border: 1px solid var(--accent3); color: var(--accent3); background: rgba(128,64,50,.07); }
+.ch-transition h1 { font-size: clamp(2.6rem,5.5vw,4.5rem); font-weight: 900; line-height: 1.05; }
+
+.demo-badge { display: inline-block; background: var(--accent); color: var(--bg); font-weight: 900; font-size: .9rem; letter-spacing: 1.5px; text-transform: uppercase; padding: 6px 16px; border-radius: 6px; margin-bottom: 20px; }
+
+.tree-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; font-family: 'Cascadia Code','Fira Code','Consolas',monospace; font-size: .82rem; }
+.tree-root { color: var(--accent); font-weight: 700; }
+.tree-branch { color: var(--muted); }
+.tree-dir { color: var(--accent2); }
+.tree-sub { color: var(--accent4); }
+
+#notes-panel { position: fixed; bottom: 0; left: var(--sidebar-w); right: 0; z-index: 100; background: var(--surface); border-top: 2px solid var(--accent); padding: 16px 28px 20px; transform: translateY(100%); transition: transform .3s ease; max-height: 220px; overflow-y: auto; }
+#notes-panel.visible { transform: translateY(0); }
+#notes-header { font-size: .72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+#notes-close { cursor: pointer; color: var(--muted); font-size: 1rem; line-height: 1; }
+#notes-close:hover { color: var(--text); }
+#notes-body { font-size: .88rem; color: var(--text); line-height: 1.7; }
+
+#theme-picker { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,.85); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 28px; }
+#theme-picker h2 { font-size: 1.6rem; font-weight: 800; color: #fff; letter-spacing: .5px; }
+#theme-picker p { color: #aaa; font-size: .9rem; margin-top: -20px; }
+.theme-options { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+.theme-card { width: 180px; border-radius: 14px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: border-color .2s, transform .15s; }
+.theme-card:hover { transform: translateY(-3px); }
+.theme-card.selected { border-color: #00c4a7; }
+.theme-preview { height: 90px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.tp-bar { height: 8px; border-radius: 4px; width: 80%; }
+.tp-bar.short { width: 55%; } .tp-bar.accent { width: 40%; }
+.tp-dots { display: flex; gap: 4px; margin-top: 2px; }
+.tp-dot { width: 8px; height: 8px; border-radius: 50%; }
+.theme-label { padding: 10px 12px; font-size: .82rem; font-weight: 700; }
+.tp-dark .theme-preview { background: #0d1117; } .tp-dark .tp-bar { background: #30363d; } .tp-dark .tp-bar.accent { background: #00c4a7; } .tp-dark .tp-dot:nth-child(1) { background: #00c4a7; } .tp-dark .tp-dot:nth-child(2) { background: #388bfd; } .tp-dark .tp-dot:nth-child(3) { background: #f78166; } .tp-dark .theme-label { background: #161b22; color: #e6edf3; }
+.tp-light .theme-preview { background: #ffffff; } .tp-light .tp-bar { background: #d0d7de; } .tp-light .tp-bar.accent { background: #0969da; } .tp-light .tp-dot:nth-child(1) { background: #0969da; } .tp-light .tp-dot:nth-child(2) { background: #8250df; } .tp-light .tp-dot:nth-child(3) { background: #cf222e; } .tp-light .theme-label { background: #f6f8fa; color: #1f2328; }
+.tp-warm .theme-preview { background: #1c1208; } .tp-warm .tp-bar { background: #4a3820; } .tp-warm .tp-bar.accent { background: #e8a44a; } .tp-warm .tp-dot:nth-child(1) { background: #e8a44a; } .tp-warm .tp-dot:nth-child(2) { background: #7ec8a0; } .tp-warm .tp-dot:nth-child(3) { background: #e07060; } .tp-warm .theme-label { background: #2a1e0f; color: #f2e6d0; }
+.tp-contrast .theme-preview { background: #000000; } .tp-contrast .tp-bar { background: #333333; } .tp-contrast .tp-bar.accent { background: #ffff00; } .tp-contrast .tp-dot:nth-child(1) { background: #ffff00; } .tp-contrast .tp-dot:nth-child(2) { background: #00ffff; } .tp-contrast .tp-dot:nth-child(3) { background: #ff4444; } .tp-contrast .theme-label { background: #0a0a0a; color: #ffffff; }
+.start-btn { padding: 12px 36px; border-radius: 8px; border: none; cursor: pointer; background: #00c4a7; color: #000; font-weight: 800; font-size: 1rem; letter-spacing: .5px; transition: opacity .2s; }
+.start-btn:hover { opacity: .85; }
+</style>
+</head>
+<body>
+
+<div id="theme-picker">
+  <h2>Choose a Theme</h2>
+  <p>You can change it later by pressing T during the presentation</p>
+  <div class="theme-options">
+    <div class="theme-card tp-dark selected" data-theme="dark" onclick="pickTheme(this)">
+      <div class="theme-preview"><div class="tp-bar"></div><div class="tp-bar short"></div><div class="tp-bar accent"></div><div class="tp-dots"><div class="tp-dot"></div><div class="tp-dot"></div><div class="tp-dot"></div></div></div>
+      <div class="theme-label">Dark</div>
+    </div>
+    <div class="theme-card tp-light" data-theme="light" onclick="pickTheme(this)">
+      <div class="theme-preview"><div class="tp-bar"></div><div class="tp-bar short"></div><div class="tp-bar accent"></div><div class="tp-dots"><div class="tp-dot"></div><div class="tp-dot"></div><div class="tp-dot"></div></div></div>
+      <div class="theme-label">Light</div>
+    </div>
+    <div class="theme-card tp-warm" data-theme="warm" onclick="pickTheme(this)">
+      <div class="theme-preview"><div class="tp-bar"></div><div class="tp-bar short"></div><div class="tp-bar accent"></div><div class="tp-dots"><div class="tp-dot"></div><div class="tp-dot"></div><div class="tp-dot"></div></div></div>
+      <div class="theme-label">Warm / Earth</div>
+    </div>
+    <div class="theme-card tp-contrast" data-theme="contrast" onclick="pickTheme(this)">
+      <div class="theme-preview"><div class="tp-bar"></div><div class="tp-bar short"></div><div class="tp-bar accent"></div><div class="tp-dots"><div class="tp-dot"></div><div class="tp-dot"></div><div class="tp-dot"></div></div></div>
+      <div class="theme-label">High Contrast</div>
+    </div>
+  </div>
+  <button class="start-btn" onclick="startPresentation()">Start Presentation</button>
+</div>
+
+<div id="notes-panel">
+  <div id="notes-header">
+    <span>Speaker Notes &nbsp;— Press N to toggle</span>
+    <span id="notes-close" onclick="toggleNotes()">&#10005;</span>
+  </div>
+  <div id="notes-body">No notes for this slide.</div>
+</div>
+
+<nav id="sidebar">
+  <div id="sidebar-header">Workshop Chapters</div>
+  <div id="chapter-list">
+    <div class="ch-item" data-ch="0" onclick="goToChapter(0)"><span class="ch-num">01</span>Welcome</div>
+    <div class="ch-item" data-ch="1" onclick="goToChapter(1)"><span class="ch-num">02</span>The AI Revolution</div>
+    <div class="ch-item" data-ch="2" onclick="goToChapter(2)"><span class="ch-num">03</span>Prompt Engineering</div>
+    <div class="ch-item" data-ch="3" onclick="goToChapter(3)"><span class="ch-num">04</span>Claude Power User</div>
+    <div class="ch-item" data-ch="4" onclick="goToChapter(4)"><span class="ch-num">05</span>Agentic AI &amp; Automation</div>
+    <div class="ch-item" data-ch="5" onclick="goToChapter(5)"><span class="ch-num">06</span>What's Next</div>
+  </div>
+</nav>
+
+<div id="main">
+  <div id="progress"><div id="progress-bar"></div></div>
+  <div id="slide-counter">1 / 20</div>
+  <div id="slide-viewport">
+
+    <!-- SLIDE 1 — Title -->
+    <div class="slide active" data-chapter="0"
+         data-notes="Welcome everyone. Ask: How many of you used ChatGPT this week? Most hands go up. Now ask: How many are confident you're using it at even 20% of its capability? Most hands go down. That gap is worth 5-10 LPA in the job market. In the next 60 minutes, we'll close that gap.">
+      <div class="slide-inner title-slide">
+        <div class="tag">TALENCIA Workshop</div>
+        <h1>AI Mastery<br><span class="accent">From User to Power User</span></h1>
+        <p class="sub" style="margin: 20px auto 0;">A hands-on lab to understand, prompt, build, and automate with AI — in 60 minutes.</p>
+        <div class="pills" style="justify-content: center; margin-top: 28px;">
+          <span class="pill green">ChatGPT</span>
+          <span class="pill blue">Claude</span>
+          <span class="pill orange">Zapier</span>
+          <span class="pill purple">Agentic AI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 — What We Cover -->
+    <div class="slide" data-chapter="0"
+         data-notes="Here's our roadmap. We cover four major areas today. This is not a lecture — it's a hands-on lab. Every demo is something you will try immediately on your laptop. By the end, you'll have a framework you'll use every single day.">
+      <div class="slide-inner">
+        <div class="tag">Overview</div>
+        <h2>What We Cover Today</h2>
+        <div class="cards">
+          <div class="card accent-border">
+            <div class="card-icon">🧠</div>
+            <h4>How LLMs Work</h4>
+            <p>Prediction, not intelligence — understand the engine before you drive.</p>
+          </div>
+          <div class="card blue-border">
+            <div class="card-icon">🎯</div>
+            <h4>Prompt Engineering</h4>
+            <p>The CPSR framework that turns generic answers into tailored output.</p>
+          </div>
+          <div class="card orange-border">
+            <div class="card-icon">⚡</div>
+            <h4>Claude &amp; Artifacts</h4>
+            <p>Build working tools, not just text — interactive apps in seconds.</p>
+          </div>
+          <div class="card purple-border">
+            <div class="card-icon">🤖</div>
+            <h4>Agentic AI &amp; Automation</h4>
+            <p>Connect AI to real-world workflows with Zapier — zero code needed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 — Chapter 1 Transition: The AI Revolution -->
+    <div class="slide" data-chapter="1"
+         data-notes="Let's start with the fundamentals. Before you can use AI effectively, you need to understand what it actually is — and more importantly, what it is NOT. This understanding is what separates amateur users from power users.">
+      <div class="slide-inner ch-transition">
+        <div class="ch-badge">Chapter 01</div>
+        <h1>The AI Revolution<br><span class="accent">Why Now?</span></h1>
+        <p class="sub" style="margin: 20px auto 0;">Three things that changed everything for students like you.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 — Why AI Matters Now -->
+    <div class="slide" data-chapter="1"
+         data-notes="Three seismic shifts have happened. First, AI is no longer a specialization — it's a baseline skill like Google was in 2005. Second, the tools are free. ChatGPT, Claude, Zapier all have free tiers powerful enough to build real things. Third, the gap between casual users and power users is massive. Most people type one question and accept the first answer. Power users have conversations, set context, iterate, and get outputs that would take hours manually.">
+      <div class="slide-inner">
+        <div class="tag orange">The Shift</div>
+        <h2>Three Things That Changed</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h4>AI is a baseline skill, not a specialization</h4>
+              <p>Every software company now expects engineers to work with AI tools. Not knowing how to prompt is like not knowing Google in 2005.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num blue">2</div>
+            <div class="step-body">
+              <h4>The tools are free &amp; accessible</h4>
+              <p>ChatGPT, Claude, Zapier — all have free tiers powerful enough to build real things. You don't need a budget. You need knowledge.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num orange">3</div>
+            <div class="step-body">
+              <h4>The user ↔ power-user gap is massive</h4>
+              <p>Most people accept the first answer. Power users set context, iterate, and get outputs that would take hours to create manually.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 — What Is an LLM? -->
+    <div class="slide" data-chapter="1"
+         data-notes="Here's the one-line explanation: an LLM is the world's most sophisticated autocomplete. It's not thinking. It's not reasoning. It's predicting the most likely next word based on patterns learned from billions of pages of text. You already understand this — when you type 'Good' in WhatsApp, your keyboard suggests 'morning', 'night', 'luck'. Now imagine a keyboard that learned from the entire internet. That's an LLM.">
+      <div class="slide-inner">
+        <div class="tag blue">Core Concept</div>
+        <h2>What Is an LLM?</h2>
+        <p class="sub" style="margin-bottom: 24px;">The world's most sophisticated autocomplete — trained on the entire internet.</p>
+        <div class="cols">
+          <div>
+            <h3>The WhatsApp Analogy 📱</h3>
+            <p class="sub" style="font-size: .92rem;">Your phone keyboard suggests <span class="accent">"morning"</span> after <span class="accent">"Good"</span> because it learned YOUR typing patterns.<br><br>Now imagine a keyboard that learned from <strong>every book, article, and code repository</strong> on earth. It can write paragraphs, code, and explanations.</p>
+          </div>
+          <div class="vstack">
+            <div class="vstack-box hi">Step 1: Feed it the internet → learns language patterns</div>
+            <div class="vstack-arrow">↓</div>
+            <div class="vstack-box hi2">Step 2: Human feedback → learns what "good" looks like</div>
+            <div class="vstack-arrow">↓</div>
+            <div class="vstack-box hi3">Step 3: Fine-tuning → learns to be helpful &amp; harmless</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 — Prediction ≠ Intelligence -->
+    <div class="slide" data-chapter="1"
+         data-notes="This is the most important slide. AI predicts what sounds right, not what IS right. It can be confidently wrong — this is called hallucination. Better input equals better predictions. Context changes everything. Try asking ChatGPT about a fake planet — it will confidently generate a brief for something that doesn't exist. This is why your skill as a prompter directly impacts output quality.">
+      <div class="slide-inner">
+        <div class="tag orange">Critical Insight</div>
+        <h2>Prediction <span class="orange">≠</span> Intelligence</h2>
+        <table class="tbl">
+          <tr><th>What It Looks Like</th><th>What's Actually Happening</th></tr>
+          <tr><td>"AI understands me"</td><td>It predicted what words usually follow yours</td></tr>
+          <tr><td>"AI knows the answer"</td><td>It generated the most statistically probable response</td></tr>
+          <tr><td>"AI is creative"</td><td>It combined patterns in unusual but statistically valid ways</td></tr>
+          <tr><td>"AI made a mistake"</td><td>The most probable prediction wasn't the correct one</td></tr>
+        </table>
+        <div class="alert warn" style="margin-top: 20px;">
+          <strong>Bottom line:</strong> AI is a power tool, not a replacement for thinking. A chainsaw makes a carpenter faster, but a carpenter who doesn't understand wood will ruin the project.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7 — Chapter 2 Transition: Prompt Engineering -->
+    <div class="slide" data-chapter="2"
+         data-notes="Now that you understand the engine, let's learn to drive it. This chapter is about going from casual AI user to power user. The difference is staggering — the 30 seconds you spend crafting a good prompt saves you 30 minutes of follow-up, editing, and frustration.">
+      <div class="slide-inner ch-transition">
+        <div class="ch-badge">Chapter 02</div>
+        <h1>Prompt Engineering<br><span class="accent">Beyond Basic Questions</span></h1>
+        <p class="sub" style="margin: 20px auto 0;">You're leaving 80% of AI's capability on the table. Let's fix that.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 8 — The Problem -->
+    <div class="slide" data-chapter="2"
+         data-notes="Most people use ChatGPT like a search engine — type a question, get a generic answer. You're using a Formula 1 car to drive to the grocery store. These basic prompts work, but they give you textbook-level, generic answers. The fix is a framework called CPSR: Context, Process, Style, Requirements.">
+      <div class="slide-inner">
+        <div class="tag">The Problem</div>
+        <h2>You're Using a Formula 1 Car<br>to <span class="orange">Drive to the Grocery Store</span></h2>
+        <div class="cols" style="margin-top: 24px;">
+          <div>
+            <h3 style="color: var(--accent3);">❌ Amateur Prompts</h3>
+            <div class="code-block" style="font-size: .78rem;">
+<span class="cm">"What is machine learning?"</span><br>
+<span class="cm">"Write me an essay on climate change"</span><br>
+<span class="cm">"Give me Python code for sorting"</span>
+            </div>
+            <p class="sub" style="font-size: .82rem; margin-top: 12px;">Generic, textbook answers. No personalization. Needs heavy editing.</p>
+          </div>
+          <div>
+            <h3 style="color: var(--accent);">✅ The Fix: CPSR Framework</h3>
+            <div class="steps" style="margin-top: 12px;">
+              <div class="step"><div class="step-num" style="min-width:28px;height:28px;font-size:.75rem;">C</div><div class="step-body"><h4>Context</h4><p>What are you working on?</p></div></div>
+              <div class="step"><div class="step-num blue" style="min-width:28px;height:28px;font-size:.75rem;">P</div><div class="step-body"><h4>Process</h4><p>How should AI think?</p></div></div>
+              <div class="step"><div class="step-num orange" style="min-width:28px;height:28px;font-size:.75rem;">S</div><div class="step-body"><h4>Style</h4><p>How should it communicate?</p></div></div>
+              <div class="step"><div class="step-num purple" style="min-width:28px;height:28px;font-size:.75rem;">R</div><div class="step-body"><h4>Requirements</h4><p>What to include/exclude?</p></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9 — CPSR Live Comparison -->
+    <div class="slide" data-chapter="2"
+         data-notes="Let's see the difference live. The amateur prompt 'Write about sorting algorithms' gives you a generic Wikipedia article. The power user prompt specifies context (placement interviews at Flipkart/Razorpay), process (compare top 3, explain when to use), style (table format for phone revision), and requirements (include gotcha interview questions). Try both right now in ChatGPT and compare the outputs.">
+      <div class="slide-inner">
+        <div class="demo-badge">Live Comparison</div>
+        <h2>Same Question, Two Ways</h2>
+        <div class="cols" style="margin-top: 16px;">
+          <div>
+            <h3 style="color: var(--accent3);">Amateur Prompt</h3>
+            <div class="code-block"><span class="cm">"Write about sorting algorithms"</span></div>
+            <p class="sub" style="font-size: .82rem; margin-top: 10px;">→ Generic Wikipedia-style answer, too long, not actionable.</p>
+          </div>
+          <div>
+            <h3 style="color: var(--accent);">Power User Prompt</h3>
+            <div class="code-block" style="font-size: .72rem;">
+<span class="kw">Context:</span> Final-year CS student, placement interviews at product companies<br>
+<span class="kw">Process:</span> Compare top 3 algorithms for coding interviews<br>
+<span class="kw">Style:</span> Table format for quick phone revision<br>
+<span class="kw">Requirements:</span> Time/space complexity + "gotcha" interview question each
+            </div>
+            <p class="sub" style="font-size: .82rem; margin-top: 10px;">→ Tailored, actionable, gets it right <strong>first time</strong>.</p>
+          </div>
+        </div>
+        <div class="alert info" style="margin-top: 18px;">
+          <strong>Try both now in ChatGPT</strong> — the 30 seconds you spend crafting a good prompt saves 30 minutes of follow-up.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10 — The 5 Pillars -->
+    <div class="slide" data-chapter="2"
+         data-notes="Here are the five pillars of effective prompting. Context tells AI what you're working on. Process tells it how to think. Style controls the tone and communication style. Requirements specify what to include or exclude. Format tells AI how to structure the output. You don't need all five every time — use what's relevant. Start simple, then refine. Copy-paste your best prompts into a personal library.">
+      <div class="slide-inner">
+        <div class="tag purple">Framework</div>
+        <h2>The 5 Pillars of Effective Prompting</h2>
+        <div class="cards" style="margin-top: 20px;">
+          <div class="card accent-border" style="min-width: 140px;">
+            <h4>🎯 Context</h4>
+            <p>"I'm a final-year CS student building a recommendation engine for my FYP"</p>
+          </div>
+          <div class="card blue-border" style="min-width: 140px;">
+            <h4>🔄 Process</h4>
+            <p>"First analyze, then suggest 3 approaches, then recommend the best one"</p>
+          </div>
+          <div class="card orange-border" style="min-width: 140px;">
+            <h4>🎨 Style</h4>
+            <p>"Explain like I'm presenting to a non-technical faculty panel"</p>
+          </div>
+          <div class="card purple-border" style="min-width: 140px;">
+            <h4>📋 Requirements</h4>
+            <p>"Include architecture diagram description, keep under 500 words"</p>
+          </div>
+          <div class="card accent-border" style="min-width: 140px;">
+            <h4>📐 Format</h4>
+            <p>"Table with columns: concept, definition, example, exam tip"</p>
+          </div>
+        </div>
+        <div class="alert info" style="margin-top: 16px;">
+          <strong>Pro tip:</strong> You don't need all 5 every time. Start simple, then refine. Build a personal prompt library.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11 — Token Awareness -->
+    <div class="slide" data-chapter="2"
+         data-notes="Tokens are the units of text that LLMs process. Rule of thumb: 1 token is about 4 characters or three-quarters of a word. Why should you care? Free tiers have limited messages — wasteful prompts burn your quota. Non-English text uses MORE tokens. 'Thiruvananthapuram' is 5-6 tokens while 'Delhi' is just 1. Being token-efficient isn't just about saving money — every token requires computing power and electricity. Sustainable AI usage means asking for what you need, not 'tell me everything'.">
+      <div class="slide-inner">
+        <div class="tag blue">Efficiency</div>
+        <h2>Token Awareness: <span class="accent">Why It Matters</span></h2>
+        <div class="cols">
+          <div>
+            <h3>What Are Tokens?</h3>
+            <table class="tbl" style="font-size: .8rem;">
+              <tr><th>Text</th><th>Tokens</th></tr>
+              <tr><td>"Hello"</td><td>1 token</td></tr>
+              <tr><td>"Thiruvananthapuram"</td><td>5-6 tokens</td></tr>
+              <tr><td>A typical email</td><td>~300 tokens</td></tr>
+              <tr><td>Full essay (1000 words)</td><td>~1,500 tokens</td></tr>
+            </table>
+            <p class="sub" style="font-size: .8rem; margin-top: 10px;"><strong>Rule of thumb:</strong> 1 token ≈ 4 characters ≈ ¾ of a word</p>
+          </div>
+          <div>
+            <h3>Why Care?</h3>
+            <div class="steps" style="margin-top: 8px; gap: 10px;">
+              <div class="step"><div class="step-num" style="min-width:26px;height:26px;font-size:.72rem;">1</div><div class="step-body"><p><strong>Free tier limits</strong> — wasteful prompts = fewer interactions</p></div></div>
+              <div class="step"><div class="step-num blue" style="min-width:26px;height:26px;font-size:.72rem;">2</div><div class="step-body"><p><strong>Context window</strong> — exceed it and AI "forgets" earlier messages</p></div></div>
+              <div class="step"><div class="step-num orange" style="min-width:26px;height:26px;font-size:.72rem;">3</div><div class="step-body"><p><strong>Sustainability</strong> — every token uses compute &amp; electricity</p></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12 — Conversation Is the Key -->
+    <div class="slide" data-chapter="2"
+         data-notes="The single biggest mistake: treating AI like a vending machine. Put in a question, get an answer, walk away. Power users treat AI like a collaborator. The pattern is: Message 1 — set context and ask AI to question you first. Message 2 — answer its questions and request a draft. Message 3 — go deeper on a specific section. Message 4 — refine with specific changes. This works for project proposals, study plans, resumes, code architecture — almost anything.">
+      <div class="slide-inner">
+        <div class="tag orange">Key Technique</div>
+        <h2>Conversation Is the Key</h2>
+        <div class="cols" style="margin-top: 16px;">
+          <div>
+            <h3 style="color: var(--accent3);">❌ Vending Machine</h3>
+            <div class="code-block" style="font-size: .76rem;"><span class="cm">"Write a project proposal for a hospital management system"</span><br><br>→ Generic 500-word proposal<br>→ Doesn't fit your needs<br>→ You spend 2 hours editing</div>
+          </div>
+          <div>
+            <h3 style="color: var(--accent);">✅ Collaborator (4 Messages)</h3>
+            <div class="vstack" style="font-size: .78rem;">
+              <div class="vstack-box hi"><strong>Msg 1:</strong> Set context + "Ask me 5 questions first"</div>
+              <div class="vstack-arrow">↓</div>
+              <div class="vstack-box hi2"><strong>Msg 2:</strong> Answer questions + "Now draft the scope"</div>
+              <div class="vstack-arrow">↓</div>
+              <div class="vstack-box hi3"><strong>Msg 3:</strong> "Go deeper on this section"</div>
+              <div class="vstack-arrow">↓</div>
+              <div class="vstack-box hi4"><strong>Msg 4:</strong> "Refine — add these specific changes"</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 13 — Chapter 3 Transition: Claude Power User -->
+    <div class="slide" data-chapter="3"
+         data-notes="Now we move from ChatGPT mastery to Claude. Different tools have different strengths — knowing when to use which makes you more effective. Would you use only a screwdriver for every home repair? Claude brings some unique superpowers, especially artifacts and a larger context window.">
+      <div class="slide-inner ch-transition">
+        <div class="ch-badge">Chapter 03</div>
+        <h1>Claude <span class="accent">Power User</span></h1>
+        <p class="sub" style="margin: 20px auto 0;">Different tools, different strengths. AI that builds things you can use.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 14 — Claude vs ChatGPT -->
+    <div class="slide" data-chapter="3"
+         data-notes="Here's a quick comparison. ChatGPT excels at general Q&A, coding, and quick tasks. Claude excels at long documents, nuanced analysis, and — critically — artifacts. Artifacts are live, interactive outputs: working web apps, calculators, quiz tools, built right in the chat. Claude also has a larger context window (200K vs 128K tokens), so you can upload entire project reports and analyze them. The best approach? Keep both open and choose based on the task.">
+      <div class="slide-inner">
+        <div class="tag blue">Comparison</div>
+        <h2>Claude vs ChatGPT</h2>
+        <table class="tbl">
+          <tr><th>Feature</th><th>ChatGPT (Free)</th><th>Claude (Free)</th></tr>
+          <tr><td>Best for</td><td>General Q&amp;A, coding, quick tasks</td><td>Long docs, analysis, nuanced writing</td></tr>
+          <tr><td>Context window</td><td>~128K tokens</td><td>~200K tokens</td></tr>
+          <tr><td>Artifacts</td><td>❌</td><td>✅ Interactive apps &amp; documents</td></tr>
+          <tr><td>Code execution</td><td>✅ Runs Python</td><td>✅ Creates runnable artifacts</td></tr>
+          <tr><td>Style</td><td>Comprehensive</td><td>Precise &amp; structured</td></tr>
+        </table>
+        <div class="alert info" style="margin-top: 14px;">
+          <strong>Pro tip:</strong> Use both. ChatGPT for quick answers &amp; debugging. Claude for building tools, analyzing long documents, and structured writing.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 15 — Artifacts Demo -->
+    <div class="slide" data-chapter="3"
+         data-notes="Let's see artifacts in action. When you ask Claude to build something, it creates a live, interactive output you can see, edit, and download. Try this right now: ask Claude to build a Pomodoro study timer with a countdown, progress ring, sound notification, and session counter. Watch it create a fully working application in seconds. The key is to be specific, describe the end user, and iterate incrementally — add one feature at a time.">
+      <div class="slide-inner">
+        <div class="demo-badge">Live Demo</div>
+        <h2>Artifacts: AI That <span class="accent">Builds Things</span></h2>
+        <div class="cols">
+          <div>
+            <h3>What Artifacts Can Create</h3>
+            <div class="steps" style="margin-top: 12px; gap: 8px;">
+              <div class="step"><div class="step-num" style="min-width:26px;height:26px;font-size:.72rem;">⚡</div><div class="step-body"><p><strong>Interactive web apps</strong> — budget trackers, quiz apps, calculators</p></div></div>
+              <div class="step"><div class="step-num blue" style="min-width:26px;height:26px;font-size:.72rem;">📄</div><div class="step-body"><p><strong>Code files</strong> — Python scripts, React components, HTML pages</p></div></div>
+              <div class="step"><div class="step-num orange" style="min-width:26px;height:26px;font-size:.72rem;">📊</div><div class="step-body"><p><strong>Visualizations</strong> — charts, flowcharts, diagrams, SVGs</p></div></div>
+            </div>
+          </div>
+          <div>
+            <h3>Try This Now in Claude</h3>
+            <div class="code-block" style="font-size: .72rem;">
+Build a Pomodoro study timer:<br>
+- 25-min study / 5-min break cycle<br>
+- Visual countdown with progress ring<br>
+- Sound notification when time is up<br>
+- Session counter<br>
+- Dark theme, easy on the eyes
+            </div>
+            <p class="sub" style="font-size: .8rem; margin-top: 10px;">Claude will create a <strong>fully working timer app</strong> right in the chat.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 16 — AI for Students -->
+    <div class="slide" data-chapter="3"
+         data-notes="AI isn't cheating — it's a skill that employers expect. Here's how to use it across your entire academic journey: for studies, use it to clarify concepts with analogies, generate exam-style questions, and create study schedules. For projects, use it for ideation, architecture decisions, code review, and documentation. For placements, use it for resume polishing, mock interviews, and company research. The rule of thumb: if you can't explain the AI's output in your own words, you don't understand it yet.">
+      <div class="slide-inner">
+        <div class="tag purple">Practical Guide</div>
+        <h2>AI for Studies, Projects &amp; Career</h2>
+        <div class="cards" style="margin-top: 16px;">
+          <div class="card accent-border" style="min-width: 200px;">
+            <div class="card-icon">📚</div>
+            <h4>Studies &amp; Exams</h4>
+            <p>Concept clarification with analogies, exam-style MCQs, study schedules weighted by weakness, doubt resolution, revision cards</p>
+          </div>
+          <div class="card blue-border" style="min-width: 200px;">
+            <div class="card-icon">🛠️</div>
+            <h4>Projects</h4>
+            <p>Ideation with constraints, tech stack comparisons, code review, architecture docs, Anna University format reports</p>
+          </div>
+          <div class="card orange-border" style="min-width: 200px;">
+            <div class="card-icon">💼</div>
+            <h4>Placements</h4>
+            <p>Resume rewriting with action verbs, mock interviews with scoring, company research, LinkedIn profile optimization</p>
+          </div>
+        </div>
+        <div class="alert warn" style="margin-top: 16px;">
+          <strong>Ethics rule:</strong> If you can't explain AI's output in your own words without looking at it — you haven't learned it yet. Use AI to <em>learn</em>, not to bypass learning.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 17 — Chapter 4 Transition: Agentic AI -->
+    <div class="slide" data-chapter="4"
+         data-notes="So far we've experienced AI that responds — you ask, it answers. Now let's explore AI that acts. This is the next wave. Level 1 was AI as assistant. Level 2 was AI as expert. Level 3 is AI as agent — you set a goal, and AI takes multiple steps to achieve it autonomously. This is the fastest-growing area in the AI industry right now.">
+      <div class="slide-inner ch-transition">
+        <div class="ch-badge">Chapter 04</div>
+        <h1>Agentic AI<br><span class="accent">&amp; Automation</span></h1>
+        <p class="sub" style="margin: 20px auto 0;">From AI that talks to AI that gets things done.</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 18 — Three Levels of AI -->
+    <div class="slide" data-chapter="4"
+         data-notes="Here are the three levels of AI usage. Level 1 is the assistant — you ask questions, it answers. That's what we did with ChatGPT. Level 2 is the expert — you collaborate, it creates artifacts. That's what we did with Claude. Level 3 is the agent — you set a goal and AI takes multiple autonomous steps. It can plan, execute across tools, react to results, and chain outputs. Zapier makes this possible for free, with zero code. The workflow model is: trigger happens, AI processes input, then actions fire automatically.">
+      <div class="slide-inner">
+        <div class="tag orange">Evolution</div>
+        <h2>Three Levels of AI Usage</h2>
+        <div class="flow" style="margin-top: 28px;">
+          <div class="flow-box hi">
+            <div style="font-size: 1.6rem; margin-bottom: 6px;">💬</div>
+            <strong>Level 1</strong><br>AI as Assistant<br><span style="font-size:.72rem;color:var(--muted);">You ask → it answers</span>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box hi2">
+            <div style="font-size: 1.6rem; margin-bottom: 6px;">⚡</div>
+            <strong>Level 2</strong><br>AI as Expert<br><span style="font-size:.72rem;color:var(--muted);">You collaborate → it creates</span>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box hi3">
+            <div style="font-size: 1.6rem; margin-bottom: 6px;">🤖</div>
+            <strong>Level 3</strong><br>AI as Agent<br><span style="font-size:.72rem;color:var(--muted);">You set a goal → it acts</span>
+          </div>
+        </div>
+        <div class="alert info" style="margin-top: 24px;">
+          <strong>Agentic AI can:</strong> Plan (break goals into steps) · Execute (act across multiple tools) · React (adjust based on results) · Chain (pipe outputs into next steps)
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 19 — Zapier Workflow Demo -->
+    <div class="slide" data-chapter="4"
+         data-notes="Zapier connects apps and automates workflows — without code. When you add AI, you get intelligent automation. Here's a real example: when someone fills a Google Form for event registration, Zapier triggers ChatGPT to write a personalized confirmation, sends it via Gmail, and logs the entry in Google Sheets. All automatic. The free tier gives you 5 active Zaps with 100 tasks per month — more than enough to learn. Student project ideas: study reminder bots, job application trackers, meeting note summarizers, feedback sentiment analyzers.">
+      <div class="slide-inner">
+        <div class="demo-badge">Demo Workflow</div>
+        <h2>Zapier + AI: <span class="accent">Smart Form Handler</span></h2>
+        <div class="flow" style="margin-top: 20px;">
+          <div class="flow-box hi"><strong>Trigger</strong><br>New Google Form response</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box hi2"><strong>AI Step</strong><br>ChatGPT writes personalized confirmation</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box hi3"><strong>Action</strong><br>Gmail sends the email</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box hi4"><strong>Action</strong><br>Google Sheets logs it</div>
+        </div>
+        <h3 style="margin-top: 28px;">More Student Ideas</h3>
+        <div class="pills">
+          <span class="pill green">Study Reminder Bot</span>
+          <span class="pill blue">Job App Tracker</span>
+          <span class="pill orange">Meeting Notes AI</span>
+          <span class="pill purple">Feedback Analyzer</span>
+        </div>
+        <p class="sub" style="font-size: .82rem; margin-top: 14px;"><strong>Free tier:</strong> 5 active Zaps · 100 tasks/month · No code needed</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 20 — What's Next + Questions -->
+    <div class="slide" data-chapter="5"
+         data-notes="Here's what you learned today and what comes next. You now understand how LLMs work, the CPSR framework, token awareness, conversation techniques, Claude artifacts, and agentic automation. Your action items this week: save the prompt cheat sheet to your phone, build one Claude artifact that solves a real problem, set up one Zapier workflow, and rewrite your resume descriptions using AI. The AI revolution isn't coming — it's here. The question is: will you lead it or follow it?">
+      <div class="slide-inner">
+        <div class="tag">Closing</div>
+        <h2>Your Action Items <span class="accent">This Week</span></h2>
+        <div class="steps" style="margin-top: 16px;">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h4>Save the CPSR cheat sheet to your phone</h4>
+              <p>Context → Process → Style → Requirements. Use it for every AI interaction.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num blue">2</div>
+            <div class="step-body">
+              <h4>Build one Claude artifact that solves a real problem</h4>
+              <p>A quiz app, CGPA calculator, or project idea generator — something you'd actually use.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num orange">3</div>
+            <div class="step-body">
+              <h4>Set up one Zapier workflow</h4>
+              <p>Automate something tedious — study reminders, form handling, email digests.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num purple">4</div>
+            <div class="step-body">
+              <h4>Rewrite your resume project descriptions using AI</h4>
+              <p>Action verb + what you built + tech stack + measurable impact. Do it today.</p>
+            </div>
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 28px;">
+          <h3 style="color: var(--accent); font-size: 1.3rem;">Questions? Let's discuss.</h3>
+          <p class="sub" style="margin: 8px auto 0;">The AI revolution isn't coming — it's here.<br>The question is: will you <strong>lead</strong> it or follow it?</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /slide-viewport -->
+  <div id="hint">← → navigate &nbsp;|&nbsp; N notes &nbsp;|&nbsp; T theme</div>
+</div><!-- /main -->
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+const total = slides.length;
+let current = 0;
+
+const chapterStarts = [];
+let lastCh = -1;
+slides.forEach((s, i) => {
+  const ch = parseInt(s.dataset.chapter);
+  if (ch !== lastCh) { chapterStarts.push({ ch, idx: i }); lastCh = ch; }
+});
+
+function goTo(n) {
+  if (n < 0 || n >= total) return;
+  slides[current].classList.remove('active');
+  slides[current].classList.add('prev');
+  const old = slides[current];
+  setTimeout(() => old.classList.remove('prev'), 400);
+  current = n;
+  slides[current].classList.add('active');
+  updateUI();
+}
+
+function goToChapter(chIdx) {
+  const e = chapterStarts.find(x => x.ch === chIdx);
+  if (e) goTo(e.idx);
+}
+
+function updateUI() {
+  document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+  document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+  const activeCh = parseInt(slides[current].dataset.chapter);
+  document.querySelectorAll('.ch-item').forEach(el =>
+    el.classList.toggle('active', parseInt(el.dataset.ch) === activeCh));
+  const notes = slides[current].dataset.notes || 'No notes for this slide.';
+  document.getElementById('notes-body').textContent = notes;
+}
+
+let selectedTheme = 'dark';
+function pickTheme(card) {
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedTheme = card.dataset.theme;
+}
+function startPresentation() {
+  document.documentElement.setAttribute('data-theme', selectedTheme);
+  const picker = document.getElementById('theme-picker');
+  if (picker) picker.style.display = 'none';
+  updateUI();
+}
+
+let notesVisible = false;
+function toggleNotes() {
+  notesVisible = !notesVisible;
+  document.getElementById('notes-panel').classList.toggle('visible', notesVisible);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
+  if (e.key === 'n' || e.key === 'N') toggleNotes();
+  if (e.key === 't' || e.key === 'T') {
+    const themes = ['dark','light','warm','contrast'];
+    const next = themes[(themes.indexOf(document.documentElement.getAttribute('data-theme') || 'dark') + 1) % themes.length];
+    document.documentElement.setAttribute('data-theme', next);
+  }
+});
+
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+document.addEventListener('touchend',   e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (dx < -50) goTo(current + 1);
+  if (dx >  50) goTo(current - 1);
+});
+
+updateUI();
+</script>
+</body>
+</html>

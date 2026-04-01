@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Flow — Pomodoro Timer</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0d0f14;
+    --surface:   #13161e;
+    --surface2:  #1c2030;
+    --border:    #252a3a;
+    --text:      #e8eaf2;
+    --muted:     #5a6080;
+    --study:     #5b8fff;
+    --study-dim: #1a2a55;
+    --break:     #4dd9a0;
+    --break-dim: #0d3326;
+    --ring-bg:   #1e2235;
+    --accent:    #ff6b6b;
+    --size: 280px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Subtle noise overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  /* Ambient glow blobs */
+  .glow {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    transition: background 1.2s ease;
+  }
+  .glow-1 { width: 500px; height: 500px; top: -180px; left: -120px; background: radial-gradient(circle, rgba(91,143,255,0.12) 0%, transparent 70%); }
+  .glow-2 { width: 400px; height: 400px; bottom: -150px; right: -100px; background: radial-gradient(circle, rgba(77,217,160,0.08) 0%, transparent 70%); }
+
+  .wrapper {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 32px;
+    padding: 40px 24px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+  }
+  .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .mode-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: background 0.5s, color 0.5s, border-color 0.5s;
+    border: 1px solid var(--border);
+  }
+  .mode-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    transition: background 0.5s;
+  }
+  body.study-mode .mode-badge { background: var(--study-dim); color: var(--study); border-color: var(--study-dim); }
+  body.study-mode .mode-badge .dot { background: var(--study); box-shadow: 0 0 6px var(--study); }
+  body.break-mode .mode-badge { background: var(--break-dim); color: var(--break); border-color: var(--break-dim); }
+  body.break-mode .mode-badge .dot { background: var(--break); box-shadow: 0 0 6px var(--break); }
+
+  /* Ring timer */
+  .ring-container {
+    position: relative;
+    width: var(--size); height: var(--size);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .ring-svg {
+    position: absolute; inset: 0;
+    transform: rotate(-90deg);
+    width: 100%; height: 100%;
+  }
+
+  .ring-track {
+    fill: none;
+    stroke: var(--ring-bg);
+    stroke-width: 6;
+  }
+
+  .ring-progress {
+    fill: none;
+    stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.6s ease;
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+
+  body.study-mode .ring-progress { stroke: var(--study); }
+  body.break-mode .ring-progress { stroke: var(--break); }
+
+  .timer-display {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    position: relative; z-index: 2;
+  }
+
+  .time-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 62px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    line-height: 1;
+    transition: color 0.5s;
+  }
+  body.study-mode .time-text { color: var(--study); }
+  body.break-mode .time-text { color: var(--break); }
+
+  .time-label {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Controls */
+  .controls {
+    display: flex; align-items: center; gap: 14px;
+  }
+
+  .btn {
+    border: none; cursor: pointer; border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-weight: 600;
+    transition: transform 0.12s, opacity 0.2s, box-shadow 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    gap: 7px;
+  }
+  .btn:active { transform: scale(0.94); }
+
+  .btn-main {
+    width: 120px; height: 48px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: #fff;
+    transition: background 0.5s, box-shadow 0.3s, transform 0.12s;
+  }
+  body.study-mode .btn-main { background: var(--study); box-shadow: 0 4px 24px rgba(91,143,255,0.35); }
+  body.study-mode .btn-main:hover { box-shadow: 0 6px 32px rgba(91,143,255,0.55); }
+  body.break-mode .btn-main { background: var(--break); box-shadow: 0 4px 24px rgba(77,217,160,0.3); }
+  body.break-mode .btn-main:hover { box-shadow: 0 6px 32px rgba(77,217,160,0.5); }
+
+  .btn-icon {
+    width: 48px; height: 48px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 16px;
+    border-radius: 12px;
+  }
+  .btn-icon:hover { color: var(--text); border-color: var(--muted); }
+
+  /* Session counter */
+  .sessions-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 28px;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    min-width: 260px;
+  }
+
+  .sessions-label {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .sessions-dots {
+    display: flex; gap: 10px; align-items: center;
+  }
+
+  .session-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--ring-bg);
+    border: 2px solid var(--border);
+    transition: background 0.4s, border-color 0.4s, box-shadow 0.4s, transform 0.3s;
+  }
+
+  .session-dot.completed {
+    background: var(--study);
+    border-color: var(--study);
+    box-shadow: 0 0 8px rgba(91,143,255,0.5);
+  }
+  .session-dot.completed.pop {
+    animation: dotPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  @keyframes dotPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.6); }
+    100% { transform: scale(1); }
+  }
+
+  .sessions-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .sessions-count span {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  /* Stats row */
+  .stats {
+    display: flex; gap: 24px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .stat { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .stat strong { font-family: 'Space Mono', monospace; font-size: 16px; color: var(--text); }
+
+  /* Notification flash */
+  .flash-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .flash-overlay.active { animation: flash 0.7s ease-out forwards; }
+
+  @keyframes flash {
+    0%   { opacity: 0.18; }
+    100% { opacity: 0; }
+  }
+
+  body.study-mode .flash-overlay { background: var(--study); }
+  body.break-mode .flash-overlay { background: var(--break); }
+
+  /* Tooltip */
+  [title] { cursor: pointer; }
+
+  /* Pulse when running */
+  .ring-container.running .ring-progress {
+    animation: ringPulse 2s ease-in-out infinite;
+  }
+  @keyframes ringPulse {
+    0%, 100% { filter: drop-shadow(0 0 6px currentColor); }
+    50%       { filter: drop-shadow(0 0 14px currentColor); }
+  }
+
+  /* Responsive */
+  @media (max-width: 380px) {
+    :root { --size: 240px; }
+    .time-text { font-size: 52px; }
+  }
+</style>
+</head>
+<body class="study-mode">
+
+<div class="glow glow-1" id="glow1"></div>
+<div class="glow glow-2" id="glow2"></div>
+<div class="flash-overlay" id="flashOverlay"></div>
+
+<div class="wrapper">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">Focus Flow</div>
+    <div class="mode-badge" id="modeBadge">
+      <span class="dot"></span>
+      <span id="modeText">Study Session</span>
+    </div>
+  </div>
+
+  <!-- Ring Timer -->
+  <div class="ring-container" id="ringContainer">
+    <svg class="ring-svg" viewBox="0 0 280 280">
+      <circle class="ring-track" cx="140" cy="140" r="126"/>
+      <circle class="ring-progress" id="ringProgress" cx="140" cy="140" r="126"/>
+    </svg>
+    <div class="timer-display">
+      <div class="time-text" id="timeText">25:00</div>
+      <div class="time-label" id="timeLabel">minutes remaining</div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn btn-icon" id="resetBtn" title="Reset current session" onclick="resetTimer()">↺</button>
+    <button class="btn btn-main" id="startBtn" onclick="toggleTimer()">▶ Start</button>
+    <button class="btn btn-icon" id="skipBtn" title="Skip to next phase" onclick="skipPhase()">⇥</button>
+  </div>
+
+  <!-- Session Counter -->
+  <div class="sessions-panel">
+    <div class="sessions-label">Completed Sessions</div>
+    <div class="sessions-dots" id="sessionDots">
+      <div class="session-dot" id="dot0"></div>
+      <div class="session-dot" id="dot1"></div>
+      <div class="session-dot" id="dot2"></div>
+      <div class="session-dot" id="dot3"></div>
+    </div>
+    <div class="sessions-count">
+      <span id="sessionCount">0</span> / 4 sessions today
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><strong id="statFocus">0</strong>Focus min</div>
+    <div class="stat"><strong id="statBreaks">0</strong>Breaks</div>
+    <div class="stat"><strong id="statStreak">0</strong>Streak</div>
+  </div>
+
+</div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────
+  const STUDY_SECS = 25 * 60;
+  const BREAK_SECS = 5 * 60;
+
+  let isStudy      = true;
+  let isRunning    = false;
+  let remaining    = STUDY_SECS;
+  let total        = STUDY_SECS;
+  let intervalId   = null;
+  let sessions     = 0;
+  let focusMinutes = 0;
+  let breaksCount  = 0;
+  let streak       = 0;
+
+  // ── Ring math ──────────────────────────────────────────────────────────
+  const RADIUS        = 126;
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+  const ring          = document.getElementById('ringProgress');
+  ring.style.strokeDasharray  = CIRCUMFERENCE;
+  ring.style.strokeDashoffset = 0;
+
+  function setRingProgress(pct) {
+    ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - pct);
+  }
+
+  // ── Display ────────────────────────────────────────────────────────────
+  function updateDisplay() {
+    const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+    const s = String(remaining % 60).padStart(2, '0');
+    document.getElementById('timeText').textContent = `${m}:${s}`;
+    document.getElementById('timeLabel').textContent =
+      isStudy ? 'minutes remaining' : 'break remaining';
+    setRingProgress(remaining / total);
+    document.getElementById('statFocus').textContent   = focusMinutes;
+    document.getElementById('statBreaks').textContent  = breaksCount;
+    document.getElementById('statStreak').textContent  = streak;
+  }
+
+  function setMode(studyMode) {
+    isStudy   = studyMode;
+    isRunning = false;
+    remaining = studyMode ? STUDY_SECS : BREAK_SECS;
+    total     = studyMode ? STUDY_SECS : BREAK_SECS;
+
+    document.body.className       = studyMode ? 'study-mode' : 'break-mode';
+    document.getElementById('modeText').textContent =
+      studyMode ? 'Study Session' : 'Break Time';
+    document.getElementById('startBtn').textContent  = '▶ Start';
+    document.getElementById('ringContainer').classList.remove('running');
+    updateDisplay();
+  }
+
+  // ── Timer logic ────────────────────────────────────────────────────────
+  function toggleTimer() {
+    if (isRunning) {
+      pauseTimer();
+    } else {
+      startTimer();
+    }
+  }
+
+  function startTimer() {
+    isRunning = true;
+    document.getElementById('startBtn').textContent = '⏸ Pause';
+    document.getElementById('ringContainer').classList.add('running');
+    intervalId = setInterval(tick, 1000);
+  }
+
+  function pauseTimer() {
+    isRunning = false;
+    clearInterval(intervalId);
+    document.getElementById('startBtn').textContent = '▶ Resume';
+    document.getElementById('ringContainer').classList.remove('running');
+  }
+
+  function resetTimer() {
+    clearInterval(intervalId);
+    remaining = total;
+    isRunning = false;
+    document.getElementById('startBtn').textContent = '▶ Start';
+    document.getElementById('ringContainer').classList.remove('running');
+    updateDisplay();
+  }
+
+  function skipPhase() {
+    clearInterval(intervalId);
+    onPhaseEnd();
+  }
+
+  function tick() {
+    remaining--;
+    updateDisplay();
+    if (remaining <= 0) {
+      clearInterval(intervalId);
+      onPhaseEnd();
+    }
+  }
+
+  function onPhaseEnd() {
+    playAlert();
+    triggerFlash();
+
+    if (isStudy) {
+      // Completed a study session
+      sessions = Math.min(sessions + 1, 4);
+      focusMinutes += 25;
+      streak++;
+      updateSessionDots();
+    } else {
+      breaksCount++;
+    }
+
+    // Switch mode
+    setMode(!isStudy);
+    // Auto-start next phase after brief pause
+    setTimeout(() => startTimer(), 1200);
+  }
+
+  // ── Session dots ───────────────────────────────────────────────────────
+  function updateSessionDots() {
+    document.getElementById('sessionCount').textContent = sessions;
+    for (let i = 0; i < 4; i++) {
+      const dot = document.getElementById(`dot${i}`);
+      if (i < sessions) {
+        dot.classList.add('completed');
+        if (i === sessions - 1) {
+          dot.classList.remove('pop');
+          void dot.offsetWidth; // reflow
+          dot.classList.add('pop');
+        }
+      } else {
+        dot.classList.remove('completed', 'pop');
+      }
+    }
+    // Reset after 4
+    if (sessions >= 4) {
+      setTimeout(() => {
+        sessions = 0;
+        updateSessionDots();
+      }, 2500);
+    }
+  }
+
+  // ── Sound ──────────────────────────────────────────────────────────────
+  function playAlert() {
+    try {
+      const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+      const play = (freq, start, duration, type = 'sine') => {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type     = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+        gain.gain.setValueAtTime(0, ctx.currentTime + start);
+        gain.gain.linearRampToValueAtTime(0.22, ctx.currentTime + start + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + duration + 0.05);
+      };
+      // Three-note chime: pleasant and non-jarring
+      if (isStudy) {
+        // Study done: ascending gentle chime
+        play(523.25, 0,    0.35);
+        play(659.25, 0.18, 0.35);
+        play(783.99, 0.36, 0.5);
+      } else {
+        // Break done: descending back-to-work
+        play(783.99, 0,    0.3);
+        play(659.25, 0.18, 0.3);
+        play(523.25, 0.36, 0.5);
+      }
+    } catch (e) { /* audio not available */ }
+  }
+
+  // ── Flash ──────────────────────────────────────────────────────────────
+  function triggerFlash() {
+    const el = document.getElementById('flashOverlay');
+    el.classList.remove('active');
+    void el.offsetWidth;
+    el.classList.add('active');
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────
+  setMode(true);
+</script>
+</body>
+</html>

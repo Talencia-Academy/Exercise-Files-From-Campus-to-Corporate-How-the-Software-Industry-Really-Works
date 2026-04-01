@@ -1,0 +1,70 @@
+Sprint 1 – Project Setup & Basic Structure (2 Weeks)
+
+Goal: Create the foundation of the project
+
+Tasks:
+
+Define project requirements
+
+Create UI wireframe
+
+Set up Git repository
+
+Build login page
+
+Create basic database structure
+
+Deliverable:
+Working Login Page + Project Setup
+
+Sprint 2 – Core Functionality
+
+Goal: Implement attendance features
+
+Tasks:
+
+Add student registration
+
+Create attendance marking module
+
+Store attendance in database
+
+Display attendance list
+
+Deliverable:
+Working Attendance Management Feature
+
+Sprint 3 – Enhancements & Reports
+
+Goal: Improve usability and generate reports
+
+Tasks:
+
+Create attendance dashboard
+
+Add monthly attendance report
+
+Improve UI design
+
+Fix bugs
+
+Deliverable:
+Complete functional application
+
+Agile Activities During Each Sprint
+
+Daily Standup
+
+Team discusses progress and blockers
+
+Sprint Review
+
+Demonstrate the working feature to faculty/mentor
+
+Retrospective
+
+Discuss what worked well and what needs improvement
+
+Key Learning
+
+Instead of building the entire project at once, Agile allows the team to build the project step-by-step and deliver working features every 2 weeks.
