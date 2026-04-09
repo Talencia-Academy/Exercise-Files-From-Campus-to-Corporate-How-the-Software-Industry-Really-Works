@@ -1,0 +1,5 @@
+Create a mermaid diagram (10 minutes)
+
+Instructions for students:
+Open https://mermaid.live
+Create a flowchart showing a simple login process: User enters credentials → System validates → If valid, redirect to dashboard; if invalid, show error

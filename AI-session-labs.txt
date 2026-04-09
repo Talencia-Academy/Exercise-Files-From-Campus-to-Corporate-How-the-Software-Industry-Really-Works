@@ -1,0 +1,65 @@
+Lab 01 - Prediction Vs Intelligence
+
+Test 1: Type “How many times does the letter r appear in the word strawberry?”
+Test 2: Type “A bat and a ball cost ₹110. The bat costs ₹100 more than the ball. How much does the ball cost?” 
+Test 3: Type “Create a brief about the planet BC1099-X.” 
+
+---
+
+Lab 02 - C-P-S-R Framework
+
+Prompt 1: "Write about sorting algorithms"
+
+Prompt 2: A Final-year CS student, attending placement interviews at product companies like Flipkart or RazorPay. Compare top 3 algorithms for coding interviews. Present it in Table format for quick phone revision. Include Time/space complexity + "gotcha" interview questions
+
+---
+Lab 03 - Prompt Engineering Practice (5 minutes)
+
+Pair 1 — Study Help:
+Prompt 1: “Explain OOPS concepts.”
+Prompt 2: Add context (3rd year CS, struggling with Java OOP, exam in 2 weeks), process (explain 4 concepts one at a time), style (one-line definition, analogy, code example, exam question each), requirements (under 500 words, simple language).
+
+Pair 2 — Code Help:
+Prompt 1: “Write a Python calculator.”
+Prompt 2: Add context (college lab submission, GUI), process (choose library then code with comments), style (beginner-friendly), requirements (tkinter, error handling, buttons).
+
+Pair 3 — Career Help:
+Prompt 1: “How to prepare for software interviews.”
+Prompt 2: Add context (final year, tier-2 college Kerala, Java/DSA, targeting TCS/Infosys), process (30-day plan, weekly themes), style (table format), requirements (60% aptitude+DSA, 30% technical, 10% HR).
+
+---
+
+Lab 04 — Token Budget Challenge (3 min)
+You have a token budget of 50 input tokens — about 35 to 40 words.
+Your goal: get the BEST possible answer about “how to learn Data Structures” using the fewest tokens.
+
+Steps:
+Open the OpenAI Tokenizer at platform.openai.com/tokenizer.
+Write your prompt, check the token count, then send it to ChatGPT.
+
+Here’s the trick:
+Removing filler words like “please”, “can you”, “I would like” saves tokens.
+Abbreviations work — “DSA” instead of “Data Structures and Algorithms”.
+Format instructions like “table format” improve output without costing many tokens.
+---
+
+Lab 05 — Iterative Conversation (4 min)
+
+You’re going to build a technical architecture for a “Smart Campus Lost & Found” web app using exactly 4 messages.
+Message 1: Describe the project and ask AI to question you first.
+Message 2: Answer its questions and request a tech stack comparison.
+Message 3: Pick an option and ask for detailed architecture.
+Message 4: Refine — add notifications, an AI feature, and a free deployment plan.
+
+In 4 messages, you’ll have generated what would take 2 to 3 hours to write from scratch. This is the pattern: Context, Draft, Deepen, Refine.
+---
+
+Lab 06 - Claude Artifacts
+
+Open Claude.
+Type the Pomodoro timer prompt: “Build a Pomodoro study timer with 25-min study / 5-min break cycle, visual countdown with progress ring, sound notification, session counter, dark theme.” Watch Claude create a fully working app as an artifact. Interact with it live on screen.
+
+---
+
+
+
