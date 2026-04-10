@@ -1,0 +1,16 @@
+Objective
+Students will learn how to “Host a live website accessible to anyone in the world — in 5 minutes, for free.”
+
+Steps
+
+1. Log in to AWS Console (AWS Management Console) → Navigate to S3 service.
+2. Create Bucket:
+   - Give it a unique name (e.g., `talencia-<student name>-workshop-demo`).
+   - Keep default settings (Uncheck `Block public access`).
+3. Upload the workshop HTML file (index.html) to your bucket
+4. Enable Website Hosting
+   - Properties → Static Website Hosting → Enable
+5. Add Bucket Policy
+   - Permissions → Bucket Policy → Allow public read access
+6. Visit Your Live Site!
+   - Open the endpoint URL — your website is live on the internet

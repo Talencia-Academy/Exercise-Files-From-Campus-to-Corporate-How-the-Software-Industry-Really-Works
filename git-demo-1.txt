@@ -1,0 +1,25 @@
+Objective
+Learn how to create a repository, commit changes, and push to GitHub
+--------------------------------------------------------------------
+Steps
+1. Install Git (if not already installed).
+- Windows: Git for Windows
+- macOS/Linux: usually pre-installed, check with git --version.
+2. Create a new folder:
+	mkdir github_demo
+	cd github_demo
+3. Initialize Git repo:
+	git init
+4. Create a file:
+	echo "Hello GitHub!" > readme.txt
+	git status
+	git diff
+5. Stage and commit:
+	git add readme.txt
+	git commit -m "Initial commit: added readme.txt"
+6. Create a repo on GitHub (via the website). Copy the repo URL.
+7. Link local repo to GitHub:
+        git remote add origin https://github.com/<username>/<repo>.git
+8.  Push changes:
+	git branch -M main
+	git push -u origin main

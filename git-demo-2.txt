@@ -1,0 +1,17 @@
+Objective
+Learn how to create branches, make changes, and submit pull requests
+--------------------------------------------------------------------
+Steps
+1. Create a new branch:
+	git checkout -b feature-attendance
+2. Edit the file:
+        echo "This is the attendance feature." >> readme.txt
+3. Stage and commit:
+	git add readme.txt
+	git commit -m "Added attendance feature description"
+4. Push branch to GitHub:
+	git push origin feature-attendance
+5. Go to GitHub website → You’ll see a prompt to create a Pull Request.
+6. Click Compare & Pull Request.
+7. Add a description and submit.
+8. Merge the Pull Request into main.
